@@ -1,4 +1,6 @@
 import { Hono } from "hono";
+import { remember } from "../lib/cache";
+import { jsonError } from "../lib/errors";
 import { extractVideoId, ytdlp } from "../utils";
 
 export const info = new Hono();
@@ -11,11 +13,13 @@ info.get("/", async (c) => {
   if (!videoId) return c.json({ error: "Invalid YouTube URL" }, 400);
 
   try {
-    const raw = await ytdlp([
-      "--dump-json",
-      "--no-download",
-      `https://www.youtube.com/watch?v=${videoId}`,
-    ]);
+    const raw = await remember(`info:${videoId}`, 1000 * 60 * 60 * 24, async () =>
+      ytdlp([
+        "--dump-json",
+        "--no-download",
+        `https://www.youtube.com/watch?v=${videoId}`,
+      ])
+    );
 
     const data = JSON.parse(raw);
 
@@ -41,7 +45,8 @@ info.get("/", async (c) => {
         filesize: f.filesize,
       })),
     });
-  } catch (e: any) {
-    return c.json({ error: e.message }, 500);
+  } catch (error) {
+    const normalized = jsonError(error);
+    return c.json(normalized.body, normalized.status);
   }
 });

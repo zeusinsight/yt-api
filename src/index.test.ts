@@ -1,5 +1,8 @@
 import { test, expect, describe } from "bun:test";
-import { app } from "./app";
+
+process.env.YT_API_MOCK = "1";
+
+const { app } = await import("./app");
 
 const req = (path: string) => app.request(path);
 
