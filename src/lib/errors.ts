@@ -94,3 +94,28 @@ export function jsonError(error: unknown): {
     },
   };
 }
+
+export function respondWithError(
+  route: string,
+  error: unknown,
+  context?: Record<string, unknown>
+) {
+  const normalized = jsonError(error);
+  const level = normalized.status >= 500 ? "error" : "warn";
+  const payload = {
+    route,
+    ...context,
+    status: normalized.status,
+    code: normalized.body.code,
+    error: normalized.body.error,
+    details: normalized.body.details,
+  };
+
+  if (level === "error") {
+    console.error("[api]", payload);
+  } else {
+    console.warn("[api]", payload);
+  }
+
+  return normalized;
+}

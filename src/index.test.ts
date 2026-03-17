@@ -103,8 +103,16 @@ describe("GET /comments", () => {
 });
 
 describe("GET /channel", () => {
-  test("400 without url param", async () => {
+  test("400 without name param", async () => {
     const res = await req("/channel");
     expect(res.status).toBe(400);
+  });
+
+  test("returns channel info by name", async () => {
+    const res = await req("/channel?name=RickAstley");
+    const data = await res.json();
+    expect(res.status).toBe(200);
+    expect(data.name).toBeString();
+    expect(data.channelId).toBeString();
   });
 });

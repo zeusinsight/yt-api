@@ -31,8 +31,8 @@ Add each endpoint in the RapidAPI dashboard:
 - **Description**: Extract video comments with author, text, likes
 
 ### GET /channel
-- **Parameters**: `url` (required)
-- **Description**: Get channel information
+- **Parameters**: `name` (required)
+- **Description**: Get channel information from a channel name or handle
 
 ## 3. Pricing Plans
 

@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { remember } from "../lib/cache";
-import { jsonError } from "../lib/errors";
+import { respondWithError } from "../lib/errors";
 import { extractVideoId, ytdlp } from "../utils";
 
 export const info = new Hono();
@@ -46,7 +46,7 @@ info.get("/", async (c) => {
       })),
     });
   } catch (error) {
-    const normalized = jsonError(error);
+    const normalized = respondWithError("info", error, { videoId });
     return c.json(normalized.body, normalized.status);
   }
 });

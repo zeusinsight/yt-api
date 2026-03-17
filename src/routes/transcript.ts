@@ -4,7 +4,7 @@ import {
   YoutubeTranscriptNotAvailableLanguageError,
 } from "youtube-transcript-plus";
 import { remember } from "../lib/cache";
-import { jsonError, normalizeTranscriptError } from "../lib/errors";
+import { normalizeTranscriptError, respondWithError } from "../lib/errors";
 import { isMockMode, mockTranscript } from "../lib/mock";
 import { extractVideoId } from "../utils";
 
@@ -69,7 +69,11 @@ transcript.get("/", async (c) => {
       fullText,
     });
   } catch (error) {
-    const normalized = jsonError(normalizeTranscriptError(error));
+    const normalized = respondWithError(
+      "transcript",
+      normalizeTranscriptError(error),
+      { videoId, lang }
+    );
     return c.json(normalized.body, normalized.status);
   }
 });

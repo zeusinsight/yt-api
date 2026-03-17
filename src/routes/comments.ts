@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { remember } from "../lib/cache";
-import { jsonError } from "../lib/errors";
+import { respondWithError } from "../lib/errors";
 import { extractVideoId, ytdlp } from "../utils";
 
 export const comments = new Hono();
@@ -40,7 +40,10 @@ comments.get("/", async (c) => {
 
     return c.json({ videoId, count: comments.length, comments });
   } catch (error) {
-    const normalized = jsonError(error);
+    const normalized = respondWithError("comments", error, {
+      videoId,
+      limit,
+    });
     return c.json(normalized.body, normalized.status);
   }
 });

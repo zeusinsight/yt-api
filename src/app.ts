@@ -19,7 +19,7 @@ app.get("/", (c) =>
       "GET /info?url={videoUrl}",
       "GET /search?q={query}&limit={limit}",
       "GET /comments?url={videoUrl}",
-      "GET /channel?url={channelUrl}",
+      "GET /channel?name={channelName}",
     ],
   })
 );

@@ -1,0 +1,175 @@
+# 🚀 Fast YouTube Transcript API
+
+Extract YouTube transcripts, video metadata, search results, comments, and channel details from a fast, cache-backed API built for AI apps, research tools, and content workflows.
+
+## ✨ Why use this API?
+
+- ⚡ Fast transcript extraction with low latency
+- 🌍 Language support with graceful fallback when a subtitle language is unavailable
+- 🧠 Built for AI apps, RAG pipelines, and automation
+- 🗂️ Cache-backed responses for repeated requests
+- 📺 No YouTube API quota needed
+- 🔎 Extra endpoints for info, search, comments, and channel data
+
+## 📌 Main use cases
+
+- AI assistants that need YouTube transcripts
+- Content summarization and analysis
+- RAG ingestion pipelines
+- Search and discovery features
+- Creator dashboards
+- Competitive research tools
+
+## 🧩 Available endpoints
+
+### `GET /transcript`
+
+Fetch the transcript of a YouTube video.
+
+Use it when you need:
+
+- Full transcript text
+- Timestamped segments
+- Language-specific subtitles
+
+Example:
+
+```bash
+/transcript?url=dQw4w9WgXcQ&lang=en
+```
+
+Notes:
+
+- `lang` is optional
+- If the requested language is not available, the API can fall back to another available transcript
+- Best endpoint for AI and summarization use cases
+
+---
+
+### `GET /info`
+
+Fetch video metadata and technical details.
+
+Use it when you need:
+
+- Title
+- Description
+- Duration
+- Views
+- Likes
+- Uploader
+- Tags
+- Formats
+
+Example:
+
+```bash
+/info?url=dQw4w9WgXcQ
+```
+
+Best for:
+
+- Video cataloging
+- Metadata enrichment
+- Content dashboards
+
+---
+
+### `GET /search`
+
+Search YouTube videos by query.
+
+Use it when you need:
+
+- Search results
+- Video IDs
+- Titles
+- Durations
+- Thumbnails
+- Uploaders
+
+Example:
+
+```bash
+/search?q=rick%20astley&limit=3
+```
+
+Best for:
+
+- Discovery
+- Search bars
+- Topic exploration
+
+---
+
+### `GET /comments`
+
+Fetch comments from a YouTube video.
+
+Use it when you need:
+
+- Author name
+- Comment text
+- Likes
+- Timestamp
+- Hearted state
+
+Example:
+
+```bash
+/comments?url=dQw4w9WgXcQ&limit=5
+```
+
+Best for:
+
+- Sentiment analysis
+- Community insight
+- Engagement tracking
+
+---
+
+### `GET /channel`
+
+Fetch channel metadata from a channel name or handle.
+
+Use it when you need:
+
+- Channel name
+- Channel ID
+- Channel URL
+- Description
+- Uploader data
+
+Example:
+
+```bash
+/channel?name=channelname
+```
+
+Best for:
+
+- Creator profiles
+- Channel directories
+- Audience research
+
+## 🛠️ Response behavior
+
+- ✅ Fast repeated calls thanks to caching
+- ✅ Clean JSON responses
+- ✅ Clear HTTP errors for invalid URLs or unavailable content
+- ✅ Graceful handling when transcript language is missing
+
+## 💡 Recommended endpoint
+
+If you only need one endpoint, start with:
+
+### `GET /transcript`
+
+It is the fastest and most useful endpoint for most AI and content-driven apps.
+
+## 💳 Plans
+
+- Free: limited testing
+- Starter: transcript, info, search
+- Pro: includes comments
+- Business: higher quotas and higher rate limits

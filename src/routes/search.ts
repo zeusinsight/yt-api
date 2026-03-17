@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { remember } from "../lib/cache";
-import { jsonError } from "../lib/errors";
+import { respondWithError } from "../lib/errors";
 import { ytdlp } from "../utils";
 
 export const search = new Hono();
@@ -42,7 +42,7 @@ search.get("/", async (c) => {
 
     return c.json({ query: q, count: results.length, results });
   } catch (error) {
-    const normalized = jsonError(error);
+    const normalized = respondWithError("search", error, { query: q, limit });
     return c.json(normalized.body, normalized.status);
   }
 });
