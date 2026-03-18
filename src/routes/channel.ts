@@ -9,34 +9,35 @@ channel.get("/", async (c) => {
   const name = c.req.query("name") || c.req.query("url");
   if (!name) return c.json({ error: "Missing ?name parameter" }, 400);
 
+  const handle = name.startsWith("http")
+    ? null
+    : name.replace(/^@/, "");
   const channelPath = name.startsWith("http")
-    ? name
-    : `https://www.youtube.com/@${name.replace(/^@/, "")}/videos`;
+    ? name.includes("/about")
+      ? name
+      : `${name.replace(/\/$/, "")}/about`
+    : `https://www.youtube.com/@${handle}/about`;
+  const channelUrl = name.startsWith("http")
+    ? name.replace(/\/about\/?$/, "")
+    : `https://www.youtube.com/@${handle}`;
 
   try {
     const raw = await remember(
       `channel:${name}`,
       1000 * 60 * 60 * 24,
       async () =>
-        ytdlp([
-          "--dump-json",
-          "--flat-playlist",
-          "--no-download",
-          "--playlist-end",
-          "1",
-          channelPath,
-        ])
+        ytdlp(["--dump-single-json", "--no-download", channelPath])
     );
 
-    const firstLine = raw.split("\n")[0];
-    const data = JSON.parse(firstLine);
+    const data = JSON.parse(raw);
 
     return c.json({
       channelId: data.channel_id,
-      name: data.channel,
-      channel: data.channel,
-      uploader: data.uploader,
-      channelUrl: data.channel_url,
+      name: data.channel || data.title,
+      channel: data.channel || data.title,
+      uploader: data.channel || data.title,
+      channelUrl: data.channel_url || channelUrl,
+      subscribers: data.channel_follower_count,
       description: data.description,
     });
   } catch (error) {

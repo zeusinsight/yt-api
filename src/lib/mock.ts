@@ -36,12 +36,14 @@ export async function mockYtdlp(args: string[]): Promise<string> {
     });
   }
 
-  if (joined.includes("--playlist-end 1")) {
+  if (joined.includes("/about")) {
     return JSON.stringify({
+      id: "@MrBeast",
       channel_id: "UC38IQsAvIsxxjztdMZQtwHA",
       channel: "Rick Astley",
-      uploader: "Rick Astley",
-      channel_url: "https://www.youtube.com/channel/UC38IQsAvIsxxjztdMZQtwHA",
+      title: "Rick Astley",
+      channel_follower_count: 123456,
+      channel_url: "https://www.youtube.com/@RickAstley",
       description: "Official channel",
     });
   }

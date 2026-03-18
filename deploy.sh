@@ -68,13 +68,9 @@ rsync -avz --exclude node_modules --exclude .git \
     ./ root@"$SERVER_IP":/opt/yt-api/
 
 echo "🐳 Starting container..."
-ssh -o StrictHostKeyChecking=no root@"$SERVER_IP" << 'REMOTE'
-    cd /opt/yt-api
-    docker compose down 2>/dev/null || true
-    docker compose up -d --build
-    echo "✅ Container running!"
-    docker compose logs --tail 5
-REMOTE
+PROXY_URL_ESCAPED=$(printf '%q' "${PROXY_URL:-}")
+ssh -o StrictHostKeyChecking=no root@"$SERVER_IP" \
+    "cd /opt/yt-api && PROXY_URL=${PROXY_URL_ESCAPED} docker compose down 2>/dev/null || true && PROXY_URL=${PROXY_URL_ESCAPED} docker compose up -d --build && echo '✅ Container running!' && PROXY_URL=${PROXY_URL_ESCAPED} docker compose logs --tail 5"
 
 echo ""
 echo "============================================"
