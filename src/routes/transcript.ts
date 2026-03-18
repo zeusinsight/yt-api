@@ -6,9 +6,58 @@ import {
 import { remember } from "../lib/cache";
 import { normalizeTranscriptError, respondWithError } from "../lib/errors";
 import { isMockMode, mockTranscript } from "../lib/mock";
+import { getProxyUrl, proxyFetch } from "../lib/proxy";
 import { extractVideoId } from "../utils";
 
 export const transcript = new Hono();
+
+function buildTranscriptFetchHooks() {
+  const proxiedFetch = proxyFetch();
+
+  return {
+    videoFetch: async (params: {
+      url: string;
+      lang?: string;
+      userAgent?: string;
+    }) =>
+      proxiedFetch(params.url, {
+        method: "GET",
+        headers: {
+          ...(params.userAgent ? { "User-Agent": params.userAgent } : {}),
+          ...(params.lang ? { "Accept-Language": params.lang } : {}),
+        },
+      }),
+    playerFetch: async (params: {
+      url: string;
+      lang?: string;
+      userAgent?: string;
+      method?: "GET" | "POST";
+      body?: string;
+      headers?: Record<string, string>;
+    }) =>
+      proxiedFetch(params.url, {
+        method: params.method ?? "POST",
+        headers: {
+          ...(params.userAgent ? { "User-Agent": params.userAgent } : {}),
+          ...(params.lang ? { "Accept-Language": params.lang } : {}),
+          ...(params.headers ?? {}),
+        },
+        body: params.body,
+      }),
+    transcriptFetch: async (params: {
+      url: string;
+      lang?: string;
+      userAgent?: string;
+    }) =>
+      proxiedFetch(params.url, {
+        method: "GET",
+        headers: {
+          ...(params.userAgent ? { "User-Agent": params.userAgent } : {}),
+          ...(params.lang ? { "Accept-Language": params.lang } : {}),
+        },
+      }),
+  };
+}
 
 transcript.get("/", async (c) => {
   const url = c.req.query("url");
@@ -18,6 +67,8 @@ transcript.get("/", async (c) => {
   if (!videoId) return c.json({ error: "Invalid YouTube URL" }, 400);
 
   const lang = c.req.query("lang") || "en";
+  const proxy = getProxyUrl();
+  const transcriptFetchHooks = proxy ? buildTranscriptFetchHooks() : undefined;
 
   try {
     const payload = await remember(
@@ -35,7 +86,10 @@ transcript.get("/", async (c) => {
         }
 
         try {
-          const segments = await fetchTranscript(videoId, { lang });
+          const segments = await fetchTranscript(videoId, {
+            lang,
+            ...(transcriptFetchHooks ?? {}),
+          });
           return {
             requestedLang: lang,
             resolvedLang: segments[0]?.lang || lang,
@@ -47,7 +101,9 @@ transcript.get("/", async (c) => {
             throw error;
           }
 
-          const segments = await fetchTranscript(videoId);
+          const segments = await fetchTranscript(videoId, {
+            ...(transcriptFetchHooks ?? {}),
+          });
           return {
             requestedLang: lang,
             resolvedLang: segments[0]?.lang || "unknown",

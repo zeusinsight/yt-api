@@ -24,7 +24,10 @@ export function errorMessage(error: unknown): string {
   return "Unexpected error";
 }
 
-export function normalizeYtDlpError(error: unknown): HttpError {
+export function normalizeYtDlpError(
+  error: unknown,
+  details?: Record<string, unknown>
+): HttpError {
   const message = errorMessage(error);
   const lower = message.toLowerCase();
 
@@ -38,10 +41,10 @@ export function normalizeYtDlpError(error: unknown): HttpError {
   }
 
   if (lower.includes("rate limit") || lower.includes("429")) {
-    return new HttpError(429, "rate_limited", message);
+    return new HttpError(429, "rate_limited", message, details);
   }
 
-  return new HttpError(502, "upstream_error", message);
+  return new HttpError(502, "upstream_error", message, details);
 }
 
 export function normalizeTranscriptError(error: unknown): HttpError {

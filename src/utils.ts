@@ -1,5 +1,6 @@
 import { normalizeYtDlpError } from "./lib/errors";
 import { isMockMode, mockYtdlp } from "./lib/mock";
+import { getProxyUrl } from "./lib/proxy";
 
 export function extractVideoId(url: string): string | null {
   const patterns = [
@@ -21,9 +22,11 @@ export async function ytdlp(args: string[]): Promise<string> {
     return mockYtdlp(args);
   }
 
-  const proc = Bun.spawn(["yt-dlp", ...args], {
+  const proxy = getProxyUrl();
+  const proc = Bun.spawn(["yt-dlp", ...(proxy ? ["--proxy", proxy] : []), ...args], {
     stdout: "pipe",
     stderr: "pipe",
+    env: proxy ? { ...process.env, HTTPS_PROXY: proxy, HTTP_PROXY: proxy } : process.env,
   });
 
   const stdout = new Response(proc.stdout).text();
@@ -32,7 +35,18 @@ export async function ytdlp(args: string[]): Promise<string> {
   const [out, err] = await Promise.all([stdout, stderr]);
 
   if (code !== 0) {
-    throw normalizeYtDlpError(err || `yt-dlp exited with ${code}`);
+    const normalized = normalizeYtDlpError(err || `yt-dlp exited with ${code}`, {
+      command: "yt-dlp",
+      args,
+      exitCode: code,
+      stderr: err,
+    });
+    console.error("[yt-dlp]", {
+      args,
+      exitCode: code,
+      stderr: err,
+    });
+    throw normalized;
   }
 
   return out.trim();
